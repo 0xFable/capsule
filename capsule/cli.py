@@ -15,10 +15,11 @@ def main():
     main_parser = get_main_parser()
 
     sub_parser = get_subcommmand_parser(main_parser)
-
+    print(AVAILABLE_COMMANDS)
     # Setup the commands
-    for cmd in AVAILABLE_COMMANDS:        
-        cmd.__init__(cmd, sub_parser=sub_parser)
+    # for cmd in AVAILABLE_COMMANDS:        
+    #     cmd.__init__(cmd, sub_parser=sub_parser)
+    AVAILABLE_COMMANDS.__init__(AVAILABLE_COMMANDS, sub_parser=sub_parser)
     
     try:
         # Parse the arguments

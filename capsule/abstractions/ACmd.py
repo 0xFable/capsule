@@ -21,7 +21,7 @@ class ACmd(object):
         self.parser = sub_parser.add_parser(self.CMD_NAME,
                             help=self.CMD_HELP,
                             formatter_class=HelpFormatter,
-                            parents=[self._get_apikey_parser()])
+                            parents=[])
         self.initialise(self)
 
 

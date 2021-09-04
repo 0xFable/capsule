@@ -60,7 +60,8 @@ class DeployCmd(ACmd):
             Return success. 
         """
         # Setup the Deployer with its lcd, fcd urls as well as the desired chain.
-        chain_url="https://tequila-lcd.terra.dev", chain_fcd_url="https://tequila-fcd.terra.dev"
+        chain_url="https://tequila-lcd.terra.dev"
+        chain_fcd_url="https://tequila-fcd.terra.dev"
         
         deployer = Deployer(client=LCDClient(
             url=chain_url, 

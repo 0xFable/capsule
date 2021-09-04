@@ -29,6 +29,12 @@ Access the tool using the command line.
 capsule -h
 ```
 
+Note: If you have an issue with the above an the command line tool, depending on your platform you will need to prepare a standard distribution and install that. To do so here is two commands together:
+
+```bash
+python setup.py sdist && pip install dist/capsule-0.0.0.tar.gz
+```
+
 ## Configuration
 
 The capsule tool offers the ability to store details you need in a configuration file using the toml format. 
