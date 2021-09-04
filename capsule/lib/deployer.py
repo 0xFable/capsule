@@ -22,8 +22,9 @@ class Deployer():
     and also executing or querying those contracts
     """
 
-    def __init__(self, chain_url="https://tequila-lcd.terra.dev", chain_id="tequila-0004", chain_fcd_url="https://tequila-fcd.terra.dev") -> None:
-        self.client = LCDClient(url=chain_url, chain_id=chain_id, gas_prices=Coins(requests.get(f"{chain_fcd_url}/v1/txs/gas_prices").json()))
+    def __init__(self, client: LCDClient) -> None:
+        
+        self.client = client
         self.mnemonic = ""
         self.deployer = Wallet(lcd=self.client, key=MnemonicKey(self.mnemonic))
         self.std_fee = StdFee(4000000, "2500000uusd")

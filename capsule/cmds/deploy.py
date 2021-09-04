@@ -3,6 +3,10 @@ from capsule.abstractions import ACmd
 import pathlib
 import sys
 from capsule.lib.deployer import Deployer
+from terra_sdk.client.lcd import LCDClient
+from terra_sdk.core import Coins
+import requests
+
 sys.path.append(pathlib.Path(__file__).parent.resolve())
 
 
@@ -29,7 +33,7 @@ class DeployCmd(ACmd):
         self.parser.add_argument("-i", "--initmsg",
                                  type=str,
                                  default={},
-                                 help="(Optional) The initialisation message for the contract you are trying to deploy. Must be a jsonlike str")
+                                 help="(Optional) The initialization message for the contract you are trying to deploy. Must be a json-like str")
 
         self.parser.add_argument("-c", "--chain",
                                  type=str,
@@ -56,7 +60,12 @@ class DeployCmd(ACmd):
             Return success. 
         """
         # Setup the Deployer with its lcd, fcd urls as well as the desired chain.
-        deployer = Deployer(chain_url='https://lcd.terra.dev', chain_fcd_url='https://fcd.terra.dev', chain_id=args.chain)
+        chain_url="https://tequila-lcd.terra.dev", chain_fcd_url="https://tequila-fcd.terra.dev"
+        
+        deployer = Deployer(client=LCDClient(
+            url=chain_url, 
+            chain_id=args.chain or "tequila-0004", 
+            gas_prices=Coins(requests.get(f"{chain_fcd_url}/v1/txs/gas_prices").json())))
 
         # Attempt to store the provided package as a code object, the response will be a code ID if successful
         stored_code_id = deployer.store_contract(args.package)
