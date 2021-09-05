@@ -12,6 +12,16 @@ Firstly we are targeting [Terra](https://terra.money) as the Sponsor User chain 
 pip install -i https://test.pypi.org/simple/ capsule
 ```
 
+We have published the package also under capsule_terra. This is temporary until a final package namespace is chosen.
+
+```bash
+pip install -i https://test.pypi.org/simple/ capsule_terra
+```
+
+```bash
+pip install -i https://test.pypi.org/simple/ capsule_terra
+```
+
 ### Install locally
 
 Git clone the project and change into its parent directory.

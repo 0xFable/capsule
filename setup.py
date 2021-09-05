@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="capsule",
+    name="capsule_terra",
     license="MIT",
     version="0.0.1",
     packages=find_packages(),
