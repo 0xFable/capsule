@@ -1,0 +1,23 @@
+# Keys
+title = "Example Capsule Deploy Config"
+# This field should NOT be in your prod
+
+[deploy_info]
+mnemonic = "hello this is where your mnemonic would go, keep it safe, never commit it to github"
+# You can further segregate a section into subsections to form a nest section and a general theme
+[networks]
+    [networks.col4]
+        chain_id = "columbus-4"
+    [networks.tequila4]
+        chain_id = "tequila-0004"
+    [networks.col5]
+        chain_id = "columbus-5"
+    [networks.bombay]
+        chain_id = "bombay-10"
+
+# Arrays can be used if you want to deploy multiple contracts and want to save yourself running the commands over and over
+# [[contracts_to_deploy]]
+# file_path = "<YourFile>"
+
+# [[contracts_to_deploy]]
+# file_path = "<YourFile>"

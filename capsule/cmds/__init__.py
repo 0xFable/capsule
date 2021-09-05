@@ -1,2 +1,2 @@
 from .deploy import DeployCmd
-AVAILABLE_COMMANDS:tuple = ( DeployCmd ) 
+AVAILABLE_COMMANDS:list = [DeployCmd]

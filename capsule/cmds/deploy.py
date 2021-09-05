@@ -3,10 +3,12 @@ from capsule.abstractions import ACmd
 import pathlib
 import sys
 from capsule.lib.deployer import Deployer
+from capsule.lib.config_handler import get_config
+
 from terra_sdk.client.lcd import LCDClient
 from terra_sdk.core import Coins
 import requests
-
+import asyncio
 sys.path.append(pathlib.Path(__file__).parent.resolve())
 
 
@@ -60,19 +62,20 @@ class DeployCmd(ACmd):
             Return success. 
         """
         # Setup the Deployer with its lcd, fcd urls as well as the desired chain.
-        chain_url="https://tequila-lcd.terra.dev"
-        chain_fcd_url="https://tequila-fcd.terra.dev"
+        config = asyncio.run(get_config("./capsule/lib/settings/config.toml"))
+        # chain_url="https://tequila-lcd.terra.dev"
+        # chain_fcd_url="https://tequila-fcd.terra.dev"
         
-        deployer = Deployer(client=LCDClient(
-            url=chain_url, 
-            chain_id=args.chain or "tequila-0004", 
-            gas_prices=Coins(requests.get(f"{chain_fcd_url}/v1/txs/gas_prices").json())))
+        # deployer = Deployer(client=LCDClient(
+        #     url=chain_url, 
+        #     chain_id=args.chain or "tequila-0004", 
+        #     gas_prices=Coins(requests.get(f"{chain_fcd_url}/v1/txs/gas_prices").json())))
 
-        # Attempt to store the provided package as a code object, the response will be a code ID if successful
-        stored_code_id = deployer.store_contract(args.package)
-        # Instantiate a contract using the stored code ID for our contract bundle
-        # and an init msg which will be different depending on the contract.
-        instantiation_result = deployer.instantiate_contract(stored_code_id, init_msg=args.initmsg)
+        # # Attempt to store the provided package as a code object, the response will be a code ID if successful
+        # stored_code_id = deployer.store_contract(args.package)
+        # # Instantiate a contract using the stored code ID for our contract bundle
+        # # and an init msg which will be different depending on the contract.
+        # instantiation_result = deployer.instantiate_contract(stored_code_id, init_msg=args.initmsg)
 
 
 
