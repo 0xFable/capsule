@@ -19,8 +19,8 @@ async def get_mnemonic(strict=False):
         return os.environ["CAPSULE_MNEMONIC"]
 
     config = await get_config()
-    if config.get("CAPSULE_MNEMONIC", False):
-        return config["CAPSULE_MNEMONIC"]
+    if config.get("deploy_info", {}).get("mnemonic", False):
+        return config.get("deploy_info", {}).get("mnemonic", False)
     
     if strict:
         raise Exception("No Mnemonic was found either in the specified config file or in the environment. Strict mode is set to true")

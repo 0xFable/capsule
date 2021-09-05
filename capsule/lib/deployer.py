@@ -13,7 +13,7 @@ import pathlib
 import sys
 from capsule.lib.credential_handler import get_mnemonic
 from capsule.lib.logging_handler import LOG
-
+import asyncio
 sys.path.append(pathlib.Path(__file__).parent.resolve())
 
 
@@ -25,12 +25,13 @@ class Deployer():
     and also executing or querying those contracts
     """
 
-    async def __init__(self, client: LCDClient) -> None:
+    def __init__(self, client: LCDClient) -> None:
         
         self.client = client
-        self.mnemonic = await get_mnemonic()
+        self.mnemonic = asyncio.run(get_mnemonic())
+        LOG.debug(self.mnemonic)
         self.deployer = Wallet(lcd=self.client, key=MnemonicKey(self.mnemonic))
-        self.std_fee = StdFee(4000000, "2500000uusd")
+        self.std_fee = StdFee(4000000, "600000uluna")
 
     async def send_msg(self, msg):
         """send_msg attempts to create 
@@ -41,11 +42,11 @@ class Deployer():
         tx = self.deployer.create_and_sign_tx(
             msgs=[msg], fee=self.std_fee
         )
-        estimated = self.client.tx.estimate_fee(tx, fee_denoms=["uusd"])
-        LOG.info(f'estimated fee: {estimated}')
+        # estimated = self.client.tx.estimate_fee(tx, fee_denoms=["uusd"], msgs=[msg])
+        # LOG.info(f'estimated fee: {estimated}')
         return self.client.tx.broadcast(tx)
 
-    async def get_contract_address(instantiation_result):
+    def get_contract_address(instantiation_result):
         """get_contract_address takes a contract result
         and attempts to gather the contract address
         TODO: Refactor to make more general
@@ -81,6 +82,7 @@ class Deployer():
         bytes = read_file_as_b64(contract_path if contract_path else f"artifacts/{contract_name}.wasm")
         msg = MsgStoreCode(self.deployer.key.acc_address, bytes)
         contract_storage_result = await self.send_msg(msg)
+        LOG.info(contract_storage_result)
         return get_code_id(contract_storage_result)
     
     async def instantiate_contract(self, code_id: str, init_msg) -> str:
