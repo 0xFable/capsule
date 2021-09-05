@@ -2,6 +2,8 @@
 import toml
 import os
 
+DEFAULT_CONFIG_FILE = "CAPSULE_CONFIG_FILE"
+
 def get_config_file(filename=None):
     """Attempts to get the location of 
     the capsule config. 
@@ -19,7 +21,7 @@ def get_config_file(filename=None):
     """
 
     # First check if there is a specified location in the env
-    env_config_file = os.environ.get("CAPSULE_CONFIG_FILE", None)
+    env_config_file = os.environ.get(DEFAULT_CONFIG_FILE, None)
 
     # If a config was specified in the env, this takes priority
     if env_config_file: return env_config_file
