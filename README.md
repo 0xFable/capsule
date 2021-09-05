@@ -4,11 +4,15 @@ capsule is a small tool with a simple but noble goal; to make deployment of Cosm
 
 Firstly we are targeting [Terra](https://terra.money) as the Sponsor User chain as we build out the capsule tool. Eventually we aim to make capsule one of the tools of choice for deploying CosmWasm contracts on all chains!
 
-## Available Commands
+## Installation
 
-+ Deploy - Deploy a given cosm wasm contract artifact to a chain of your choice
+### Install from pypi
 
-## Usage
+```bash
+pip install -i https://test.pypi.org/simple/ capsule
+```
+
+### Install locally
 
 Git clone the project and change into its parent directory.
 
@@ -35,6 +39,20 @@ Note: If you have an issue with the above an the command line tool, depending on
 python setup.py sdist && pip install dist/capsule-0.0.0.tar.gz
 ```
 
+## Available Commands and Usage
+
+Deploy - Deploy a given cosm wasm contract artifact to a chain of your choice
+
+```bash
+capsule deploy -h
+usage: 
+    $ capsule deploy -p ./my_contract.wasm -c columbus-5
+    $ capsule deploy --path ./artifacts/my_contract.wasm --chain tequila-0004
+    $ capsule deploy --path ./artifacts/my_contract.wasm --initmsg {'count':3}
+
+Helper tool which enables you to programatically deploy a Wasm contract artifact to a chain as a code object and instantiate it
+```
+
 ## Configuration
 
 The capsule tool offers the ability to store details you need in a configuration file using the toml format. 
@@ -47,6 +65,7 @@ order of priority would then become Credentials in the environment -> Config fil
 Following this pattern in theory should make this tool very easy to use in CI/CD as a given user can just specify the Mnemonic and chain ID for as secrets in the job for a quick start.
 
 ## CI/CD
+
 This project uses Github Actions to perform automatic testing on each push and PR as well as a deployment to both test and prod pypi.
 
 Some notes:
