@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name="capsule",
     license="MIT",
-    version="alpha",
+    version="0.0.1",
     packages=find_packages(),
     include_package_data=True,
     # Add command line: capsule and terra_deploy
