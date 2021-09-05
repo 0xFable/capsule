@@ -35,15 +35,13 @@ def get_config_file(filename=None):
         os.makedirs(capsule_dir)
     return config_file
 
+async def get_config(config_path="settings/config.toml"):
+    """Simple function which takes a config_file
+    and attempts to parse it as a toml config
+    returning the parsed result as a dict
+    """
+    # Read toml file
+    config = toml.load(get_config_file(filename=config_path))
+    print(config)
 
-# Read local `config.toml` file.
-config = toml.load(get_config_file(filename="settings/config.toml"))
-print(config)
-
-# Retrieving a dictionary of values
-config['project']
-config.get('project')
-
-# Retrieving a value
-config['project']['author']
-config.get('project').get('author')
+    return config

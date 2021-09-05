@@ -11,6 +11,7 @@ from terra_sdk.core.wasm import MsgStoreCode, MsgInstantiateContract, MsgExecute
 
 import pathlib
 import sys
+from capsule.lib.credential_handler import get_mnemonic
 sys.path.append(pathlib.Path(__file__).parent.resolve())
 
 
@@ -22,10 +23,10 @@ class Deployer():
     and also executing or querying those contracts
     """
 
-    def __init__(self, client: LCDClient) -> None:
+    async def __init__(self, client: LCDClient) -> None:
         
         self.client = client
-        self.mnemonic = ""
+        self.mnemonic = await get_mnemonic()
         self.deployer = Wallet(lcd=self.client, key=MnemonicKey(self.mnemonic))
         self.std_fee = StdFee(4000000, "2500000uusd")
 
