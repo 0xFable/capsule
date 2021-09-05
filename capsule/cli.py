@@ -1,6 +1,8 @@
 
 from capsule.parser import get_main_parser, get_subcommmand_parser
 from capsule.cmds import DeployCmd, AVAILABLE_COMMANDS
+from capsule.lib.logging_handler import LOG
+
 import sys 
 
 def main():
@@ -15,7 +17,7 @@ def main():
     main_parser = get_main_parser()
 
     sub_parser = get_subcommmand_parser(main_parser)
-    print(AVAILABLE_COMMANDS)
+    LOG.debug(AVAILABLE_COMMANDS)
     for cmd in AVAILABLE_COMMANDS:
         cmd.__init__(cmd, sub_parser=sub_parser)
     

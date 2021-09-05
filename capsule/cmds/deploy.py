@@ -4,7 +4,7 @@ import pathlib
 import sys
 from capsule.lib.deployer import Deployer
 from capsule.lib.config_handler import get_config
-
+from capsule.lib.logging_handler import LOG
 from terra_sdk.client.lcd import LCDClient
 from terra_sdk.core import Coins
 import requests
@@ -61,6 +61,7 @@ class DeployCmd(ACmd):
 
             Return success. 
         """
+        LOG.info("Starting deployment")
         # Setup the Deployer with its lcd, fcd urls as well as the desired chain.
         config = asyncio.run(get_config("./capsule/lib/settings/config.toml"))
         # chain_url="https://tequila-lcd.terra.dev"

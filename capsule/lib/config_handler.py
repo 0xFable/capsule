@@ -1,6 +1,7 @@
 """Load configuration from .toml file."""
 import toml
 import os
+from capsule.lib.logging_handler import LOG
 
 DEFAULT_CONFIG_FILE_ENV_VAR = "CAPSULE_CONFIG_FILE"
 DEFAULT_CONFIG_FILE_NAME = "config.toml"
@@ -44,11 +45,10 @@ async def get_config(config_path=None):
     returning the parsed result as a dict
     """
     filename = get_config_file(filename=config_path)
-    print(filename)
     # Read toml file
     config = toml.load(filename)
 
-    print(f"Found these networks available: {config['networks']}")
-    print(f"Found this deployment info: {config['deploy_info']['mnemonic']}")
+    LOG.debug(f"Found these networks available: {config['networks']}")
+    LOG.debug(f"Found this deployment info: {config['deploy_info']['mnemonic']}")
 
     return config

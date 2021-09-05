@@ -12,6 +12,8 @@ from terra_sdk.core.wasm import MsgStoreCode, MsgInstantiateContract, MsgExecute
 import pathlib
 import sys
 from capsule.lib.credential_handler import get_mnemonic
+from capsule.lib.logging_handler import LOG
+
 sys.path.append(pathlib.Path(__file__).parent.resolve())
 
 
@@ -40,7 +42,7 @@ class Deployer():
             msgs=[msg], fee=self.std_fee
         )
         estimated = self.client.tx.estimate_fee(tx, fee_denoms=["uusd"])
-        print(f'estimated fee: {estimated}')
+        LOG.info(f'estimated fee: {estimated}')
         return self.client.tx.broadcast(tx)
 
     async def get_contract_address(instantiation_result):
@@ -99,6 +101,6 @@ class Deployer():
             init_msg=init_msg
         )
         instantiation_result = await self.send_msg(msg)
-        print('result')
-        print(instantiation_result)
+       
+        LOG.debug(instantiation_result)
         return self.get_contract_address(instantiation_result)
