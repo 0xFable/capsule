@@ -24,7 +24,8 @@ jobs:
           python-version: 3.8
       - name: Dependencies | Test
         run: |
+          pip install pytest mock 
           python setup.py sdist
           pip install dist/*
       - name: Unit Test | Test
-        run: pytest -v tests
+        run: pytest

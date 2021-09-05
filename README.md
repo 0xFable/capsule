@@ -45,3 +45,13 @@ It is possible also to specify the path to a custom config file using the `CAPSU
 Something to be explored is also enabling both the Mnemonic and the chain to deploy too as env vars also. If this was to happen the 
 order of priority would then become Credentials in the environment -> Config file in the environment -> Default or specified config file.
 Following this pattern in theory should make this tool very easy to use in CI/CD as a given user can just specify the Mnemonic and chain ID for as secrets in the job for a quick start.
+
+## CI/CD
+This project uses Github Actions to perform automatic testing on each push and PR as well as a deployment to both test and prod pypi.
+
+Some notes:
+When deploying to pypi, a version number can only be deployed once! All subsequent deployments will get a 400 and the job will fail.
+
+As a procedure we should update the version number when a new deployed build is needed. Or have its patch versions done automatically.
+
+Lastly the production build which pushes to Pypi only works with a tagged commit.
