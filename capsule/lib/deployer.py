@@ -5,10 +5,9 @@ import requests
 from terra_sdk.core import Coins
 from terra_sdk.client.lcd import LCDClient, Wallet
 from terra_sdk.key.mnemonic import MnemonicKey
-from terra_sdk.util.contract import read_file_as_b64, get_code_id
+from terra_sdk.util.contract import read_file_as_b64, get_code_id, get_contract_address
 from terra_sdk.core.auth import StdFee
 from terra_sdk.core.wasm import MsgStoreCode, MsgInstantiateContract, MsgExecuteContract
-
 import pathlib
 import sys
 from capsule.lib.credential_handler import get_mnemonic
@@ -46,25 +45,6 @@ class Deployer():
         # LOG.info(f'estimated fee: {estimated}')
         return self.client.tx.broadcast(tx)
 
-    def get_contract_address(instantiation_result):
-        """get_contract_address takes a contract result
-        and attempts to gather the contract address
-        TODO: Refactor to make more general
-
-        Args:
-            instantiation_result ([type]): [description]
-
-        Returns:
-            str: The contracts address
-        """
-        log = json.loads(instantiation_result.raw_log)
-        
-        contract_address = ''
-        for entry in log[0]['events'][0]['attributes']:
-            if entry['key'] == 'contract_address':
-                contract_address = entry['value']
-        return contract_address
-
     async def store_contract(self, contract_name:str, contract_path:str="") -> str:
         """store_contract attempts to 
         gather a given wasm artifact file 
@@ -85,7 +65,7 @@ class Deployer():
         LOG.info(contract_storage_result)
         return get_code_id(contract_storage_result)
     
-    async def instantiate_contract(self, code_id: str, init_msg) -> str:
+    async def instantiate_contract(self, code_id: str, init_msg:dict) -> str:
         """instantiate_contract attempts to 
         instantiate a code object with an init msg 
         into a live contract on the network. 
@@ -98,11 +78,13 @@ class Deployer():
             str: The contracts address
         """
         msg = MsgInstantiateContract(
-            owner=self.deployer.key.acc_address,
+            sender=self.deployer.key.acc_address,
+            admin=self.deployer.key.acc_address,
             code_id=code_id,
             init_msg=init_msg
         )
+
         instantiation_result = await self.send_msg(msg)
        
         LOG.debug(instantiation_result)
-        return self.get_contract_address(instantiation_result)
+        return get_contract_address(instantiation_result)
