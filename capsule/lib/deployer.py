@@ -88,3 +88,21 @@ class Deployer():
        
         LOG.debug(instantiation_result)
         return get_contract_address(instantiation_result)
+    
+    
+    
+    async def query_contract(self, contract_addr: str, query_msg):
+        """Perform a query on a given contract, returning the result
+
+        Args:
+            contract_addr (str): The contract to perform the query on 
+            query_msg (dict): The query to perform
+
+        Returns:
+            dict: Query Result
+        """
+
+        query_result = self.client.wasm.contract_query(contract_addr, query_msg)
+        LOG.debug(query_result)
+        return query_result
+

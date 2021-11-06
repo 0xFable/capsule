@@ -1,14 +1,13 @@
 """Query command -- Used to perform queries on MultiChain contracts"""
 import os
 import pathlib
-# Used to call docker-compose shell command
-import subprocess
 import sys
-from subprocess import PIPE, STDOUT
-
-# Used to clone localterra repo
-import git
-
+from capsule.lib.deployer import Deployer
+from terra_sdk.client.lcd import LCDClient
+from terra_sdk.core import Coins
+import requests
+import asyncio
+import json
 from capsule.abstractions import ACmd
 from capsule.lib.logging_handler import LOG
 
@@ -17,6 +16,7 @@ sys.path.append(pathlib.Path(__file__).parent.resolve())
 DEFAULT_TESTNET_CHAIN = "bombay-12"
 DEFAULT_CLONE_PATH = os.path.expanduser(
     os.path.join("~", ".capsule", "localterra-clones"))
+DEFAULT_TESTNET_CHAIN = "bombay-12"
 
 
 class QueryCmd(ACmd):
@@ -56,6 +56,18 @@ class QueryCmd(ACmd):
             
         """
         LOG.info("Performing query on contract addr {args.address}")
+        chain_url="https://bombay-lcd.terra.dev"
+        chain_fcd_url="https://bombay-fcd.terra.dev"
+        
+        deployer = Deployer(client=LCDClient(
+            url=chain_url, 
+            chain_id=args.chain or "bombay-12",
+            gas_prices=Coins(requests.get(f"{chain_fcd_url}/v1/txs/gas_prices").json())))
+
+        query_result = asyncio.run(deployer.query_contract(args.address, json.loads(args.query)))
+        LOG.info(f"Query Result {query_result}")
+        
+
 
 
    
