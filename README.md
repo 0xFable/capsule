@@ -100,14 +100,38 @@ mnemonic="my mem"
 capsule deploy -p artifacts/capsule_test.wasm -i '{"count":17}' -c bombay-12
 ```
 
+#### Local - get your own Ganache-CLI for Terra
+
+Helper tool which attempts to git clone the localterra repo and then compose it as services which you can use for local dev env contract testing
+
+- Install needed backing deps
+
+For this one you need to ensure you have both Git and Docker with Docker started and ready to be used. Everything else is handled via python.
+
+- Start up a locaterra instance using the capsule command
+
+```bash
+capsule local
+```
+
+And boom
+
+- If you wanna spin it down again
+
+```bash
+capsule local --down
+```
+
+With this level of control there is a bunch of config options that could be exposed here, if you want any pls open an issue!
+
 ## Configuration
 
-The capsule tool offers the ability to store details you need in a configuration file using the toml format. 
+The capsule tool offers the ability to store details you need in a configuration file using the toml format.
 
 The config file by default is located in a capsule specific hidden directory at the home dir level: `~/.capsule`
 It is possible also to specify the path to a custom config file using the `CAPSULE_CONFIG_FILE` environment variable.
 
-Something to be explored is also enabling both the Mnemonic and the chain to deploy too as env vars also. If this was to happen the 
+Something to be explored is also enabling both the Mnemonic and the chain to deploy too as env vars also. If this was to happen the
 order of priority would then become Credentials in the environment -> Config file in the environment -> Default or specified config file.
 Following this pattern in theory should make this tool very easy to use in CI/CD as a given user can just specify the Mnemonic and chain ID for as secrets in the job for a quick start.
 
