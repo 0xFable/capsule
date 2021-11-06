@@ -31,7 +31,8 @@ setup(
         'argparse',
         'requests',
         'terra_sdk',
-        'toml'
+        'toml',
+        'GitPython'
     ],
     keywords="cosmwasm terra",
 )
