@@ -1,3 +1,5 @@
 *.pyc
 .DS_STORE
 output/*
+dist/*
+capsule_terra.egg-info/
