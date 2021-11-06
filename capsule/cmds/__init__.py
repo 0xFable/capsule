@@ -1,2 +1,3 @@
 from .deploy import DeployCmd
-AVAILABLE_COMMANDS:list = [DeployCmd]
+from .local import LocalCmd
+AVAILABLE_COMMANDS:list = [DeployCmd, LocalCmd]
