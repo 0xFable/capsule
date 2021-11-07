@@ -1,0 +1,21 @@
+# Project information
+site_name: Capsule
+site_author: 0xFable
+
+# Repository
+repo_name: capsule
+repo_url: https://github.com/0xfable/capsule
+edit_uri: edit/master/docs
+
+nav:
+- 'index.md'
+markdown_extensions:
+  - mkautodoc
+
+# Theme
+theme:
+  name: "material"
+  palette:
+    scheme: default
+    primary: green
+    accent: black
