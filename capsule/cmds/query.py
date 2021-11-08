@@ -55,7 +55,7 @@ class QueryCmd(ACmd):
         """
             
         """
-        LOG.info("Performing query on contract addr {args.address}")
+        LOG.info(f"Performing query on contract addr {args.address}")
         chain_url="https://bombay-lcd.terra.dev"
         chain_fcd_url="https://bombay-fcd.terra.dev"
         
@@ -65,7 +65,7 @@ class QueryCmd(ACmd):
             gas_prices=Coins(requests.get(f"{chain_fcd_url}/v1/txs/gas_prices").json())))
 
         query_result = asyncio.run(deployer.query_contract(args.address, json.loads(args.query)))
-        LOG.info(f"Query Result {query_result}")
+        LOG.info(f"Query Result {query_result} \n\n Query Finished.")
         
 
 

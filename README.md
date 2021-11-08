@@ -4,6 +4,7 @@ capsule is a small tool with a simple but noble goal; to make deployment of Cosm
 
 Firstly we are targeting [Terra](https://terra.money) as the Sponsor User chain as we build out the capsule tool. Eventually we aim to make capsule one of the tools of choice for deploying CosmWasm contracts on all chains!
 
+[Quick video detailing how it works](https://www.youtube.com/watch?v=swBKSpBrz2c)
 ## Installation
 
 ### Install from pypi
@@ -78,7 +79,7 @@ cargo generate --git https://github.com/CosmWasm/cw-template.git --branch 0.16 -
 - Run the rust-optimizer to make an optimized version of your contract for deployment
 
 ```bash
-docker run --rm -v "$(pwd)":/code \\n  --mount type=volume,source="$(basename "$(pwd)")_cache",target=/code/target \\n  --mount type=volume,source=registry_cache,target=/usr/local/cargo/registry \\n  cosmwasm/rust-optimizer:0.12.3
+docker run --rm -v "$(pwd)":/code  --mount type=volume,source="$(basename "$(pwd)")_cache",target=/code/target  --mount type=volume,source=registry_cache,target=/usr/local/cargo/registry  cosmwasm/rust-optimizer:0.12.3
 ```
 
 - Create a capsule config file and set values in it
@@ -98,6 +99,24 @@ mnemonic="my mem"
 
 ```bash
 capsule deploy -p artifacts/capsule_test.wasm -i '{"count":17}' -c bombay-12
+```
+
+```
+usage: 
+    $ capsule deploy -p ./my_contract.wasm -c columbus-5
+    $ capsule deploy --path ./artifacts/my_contract.wasm --chain tequila-0004
+    $ capsule deploy -p artifacts/capsule_test.wasm -i '{"count":17}' -c bombay-12
+
+Helper tool which enables you to programmatically deploy a Wasm contract artifact to a chain as a code object and instantiate it
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -p PACKAGE, --package PACKAGE
+                        (required) Name of new or path to existing package
+  -i INITMSG, --initmsg INITMSG
+                        (Optional) The initialization message for the contract you are trying to deploy. Must be a json-like str
+  -c CHAIN, --chain CHAIN
+                        (Optional) A chain to deploy too. Defaults to localterra
 ```
 
 #### Local - get your own Ganache-CLI for Terra
@@ -123,6 +142,43 @@ capsule local --down
 ```
 
 With this level of control there is a bunch of config options that could be exposed here, if you want any pls open an issue!
+
+#### Query - perform queries on smart contracts without wasmd
+
+Helper tool which exposes the ability to perform queries on chain specific contract addresses
+
+```
+usage: 
+    $ capsule query --contract <addr> --chain=<> --query=<query>
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -a ADDRESS, --address ADDRESS
+                        (required) Contract Address to perform query on
+  -q QUERY, --query QUERY
+                        (Optional) The query message for the contract you are trying to query. Must be a json-like str
+  -c CHAIN, --chain CHAIN
+                        (Optional) A chain to deploy too. Defaults to localterra
+```
+
+#### Execute - quickly test actions without making scripts
+
+Helper tool which exposes the ability to prepare and sending ExecuteMsg's on chain specific contract addresses
+
+```
+usage: 
+    $ capsule execute --contract <addr> --chain <chain> --msg <msg>
+
+Helper tool which exposes the ability to prepare and sending ExecuteMsg's on chain specific contract addresses
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -a ADDRESS, --address ADDRESS
+                        (required) Contract Address to perform query on
+  -m MSG, --msg MSG     (Optional) The execution message for the contract you are trying to execute an action on. Must be a json-like str
+  -c CHAIN, --chain CHAIN
+                        (Optional) A chain to deploy too. Defaults to localterra
+```
 
 ## Configuration
 

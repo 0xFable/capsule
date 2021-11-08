@@ -86,7 +86,7 @@ class Deployer():
 
         instantiation_result = await self.send_msg(msg)
        
-        LOG.debug(instantiation_result)
+        LOG.info(instantiation_result)
         return get_contract_address(instantiation_result)
     
     async def execute_contract(self, contract_addr: str, execute_msg, coins = []):
@@ -101,16 +101,16 @@ class Deployer():
             dict: execution results
         """
         msg = MsgExecuteContract(
-            sender=self.wallet.key.acc_address,
+            sender=self.deployer.key.acc_address,
             contract=contract_addr,
             execute_msg=execute_msg,
             coins=coins
         )
-        query_result = self.send_msg(msg)
-        LOG.debug(query_result)
-        return query_result
+        exe_result = await self.send_msg(msg)
+        LOG.debug(exe_result)
+        return exe_result
     
-    async def query_contract(self, contract_addr: str, query_msg):
+    async def query_contract(self, contract_addr: str, query_msg: dict):
         """Perform a query on a given contract, returning the result
 
         Args:
@@ -120,8 +120,9 @@ class Deployer():
         Returns:
             dict: Query Result
         """
-
+        LOG.info(f"Query to be ran {query_msg}")
         query_result = self.client.wasm.contract_query(contract_addr, query_msg)
-        LOG.debug(query_result)
+        
+        LOG.info(query_result)
         return query_result
 

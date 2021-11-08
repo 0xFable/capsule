@@ -54,7 +54,7 @@ class ExecuteCmd(ACmd):
         """
             
         """
-        LOG.info("Performing msg exectution on contract addr {args.address}")
+        LOG.info(f"Performing msg exectution on contract addr {args.address}")
         chain_url="https://bombay-lcd.terra.dev"
         chain_fcd_url="https://bombay-fcd.terra.dev"
         
@@ -64,7 +64,7 @@ class ExecuteCmd(ACmd):
             gas_prices=Coins(requests.get(f"{chain_fcd_url}/v1/txs/gas_prices").json())))
 
         exe_result = asyncio.run(deployer.execute_contract(args.address, json.loads(args.msg)))
-        LOG.info(f"Execute Result {exe_result}")
+        LOG.info(f"Execute Result {exe_result} \n\n Execute Finished.")
         
 
 
