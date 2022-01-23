@@ -10,6 +10,7 @@ from terra_sdk.core.auth import StdFee
 from terra_sdk.core.wasm import MsgStoreCode, MsgInstantiateContract, MsgExecuteContract
 import pathlib
 import sys
+import requests 
 from capsule.lib.credential_handler import get_mnemonic
 from capsule.lib.logging_handler import LOG
 import asyncio
@@ -125,4 +126,25 @@ class Deployer():
         
         LOG.info(query_result)
         return query_result
+    
+    async def query_code_id(self, code_id: int):
+        """
+        """
+        LOG.info(f"Query to be ran {code_id}")
+        # query_result = self.client.wasm.code_info(code_id)
+        # query_two = self.client.wasm._c._get(f"/wasm/codes/{code_id}")
+
+        query_raw = requests.get(f"https://bombay-lcd.terra.dev/wasm/codes/{code_id}").json()
+        return query_raw
+
+    async def query_code_bytecode(self, code_id: int):
+        """
+        """
+        LOG.info(f"Query to be ran {code_id}")
+        # query_result = self.client.wasm.code_info(code_id)
+        # query_two = self.client.wasm._c._get(f"/wasm/codes/{code_id}")
+        # TODO: This query is not cross-chain capable 
+        query_raw = requests.get(f"https://bombay-lcd.terra.dev/terra/wasm/v1beta1/codes/36374/byte_code").json()
+        return query_raw
+        
 

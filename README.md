@@ -5,7 +5,7 @@ capsule is a small tool with a simple but noble goal; to make deployment of Cosm
 Firstly we are targeting [Terra](https://terra.money) as the Sponsor User chain as we build out the capsule tool. Eventually we aim to make capsule one of the tools of choice for deploying CosmWasm contracts on all chains!
 
 [Quick video detailing how it works](https://www.youtube.com/watch?v=swBKSpBrz2c)
-## Installation
+## Setup
 
 ### Install from pypi
 
@@ -49,6 +49,46 @@ Note: If you have an issue with the above an the command line tool, depending on
 ```bash
 python setup.py sdist && pip install dist/capsule-0.0.0.tar.gz
 ```
+
+## Setup Rust
+
+While WASM smart contracts can theoretically be written in any programming language, we currently only recommend using Rust as it is the only language for which mature libraries and tooling exist for CosmWasm. For this tutorial, you'll need to also install the latest version of Rust by following the instructions [here](https://www.rust-lang.org/tools/install).
+
+Then run the following commands
+
+```sh
+# set 'stable' as default release channel (used when updating rust)
+rustup default stable
+
+# add wasm as compilation target
+rustup target add wasm32-unknown-unknown
+
+# for generating contract
+cargo install cargo-generate --features vendored-openssl
+cargo install cargo-run-script
+```
+
+## Configuration
+
+The capsule tool offers the ability to store details you need in a configuration file using the toml format.
+
+The config file by default is located in a capsule specific hidden directory at the home dir level: `~/.capsule`
+It is possible also to specify the path to a custom config file using the `CAPSULE_CONFIG_FILE` environment variable.
+
+Something to be explored is also enabling both the Mnemonic and the chain to deploy too as env vars also. If this was to happen the
+order of priority would then become Credentials in the environment -> Config file in the environment -> Default or specified config file.
+Following this pattern in theory should make this tool very easy to use in CI/CD as a given user can just specify the Mnemonic and chain ID for as secrets in the job for a quick start.
+
+## CI/CD
+
+This project uses Github Actions to perform automatic testing on each push and PR as well as a deployment to both test and prod pypi.
+
+Some notes:
+When deploying to pypi, a version number can only be deployed once! All subsequent deployments will get a 400 and the job will fail.
+
+As a procedure we should update the version number when a new deployed build is needed. Or have its patch versions done automatically.
+
+Lastly the production build which pushes to Pypi only works with a tagged commit.
 
 ## Available Commands and Usage
 
@@ -180,24 +220,29 @@ optional arguments:
                         (Optional) A chain to deploy too. Defaults to localterra
 ```
 
-## Configuration
+#### Verify - quickly perform Smart Contract Verification (SCV)
 
-The capsule tool offers the ability to store details you need in a configuration file using the toml format.
+```
+usage: 
+    $ capsule verify -p ./<path_to_my_contracts_root> -c columbus-5 -i 3
+    $ capsule verify --path ./<path_to_my_contracts_root> --chain tequila-0004
+    $ capsule verify -p <path_to_my_contracts_root> -c bombay-12 -i 300
 
-The config file by default is located in a capsule specific hidden directory at the home dir level: `~/.capsule`
-It is possible also to specify the path to a custom config file using the `CAPSULE_CONFIG_FILE` environment variable.
+Helper tool which enables you to perform a Smart Contract Verification (SCV) by providing the path to a single smart-contract repo and providing a code id. The project path is passed either to
+`cargo run-script optimize` or to a custom docker invocation for ARM64 to create an optmized production wasm of the contract for comparison. The code id is used to query a stored code object's
+byte_code on the respective chain. Once the byte_code is gathered we get the SHA256 of this to compare to our locally prepared optimized wasm. If the SHA265 of on chain code object matches the
+SHA256 checksum on the optimized build we have verified the contact. Note: The outputted SHA256 and locally build optimized build will be different on ARM vs Intel. An ARM machine can only
+really be used to verify images which were built and uploaded from an ARM machine
 
-Something to be explored is also enabling both the Mnemonic and the chain to deploy too as env vars also. If this was to happen the
-order of priority would then become Credentials in the environment -> Config file in the environment -> Default or specified config file.
-Following this pattern in theory should make this tool very easy to use in CI/CD as a given user can just specify the Mnemonic and chain ID for as secrets in the job for a quick start.
+optional arguments:
+  -h, --help            show this help message and exit
+  -p PACKAGE, --package PACKAGE
+                        (required) Name of new or path to existing package
+  -i CODEID, --codeid CODEID
+                        The code_id to compare the provided contract against
+  -c CHAIN, --chain CHAIN
+                        (Optional) A chain to deploy too. Defaults to localterra
+  -n, --nobuild         (Optional) Skip the building and go right to comparing the onchain code with your own. This assumes you already ran an optimized build and saves you rebuilding each time
+                        you run verify command
+```
 
-## CI/CD
-
-This project uses Github Actions to perform automatic testing on each push and PR as well as a deployment to both test and prod pypi.
-
-Some notes:
-When deploying to pypi, a version number can only be deployed once! All subsequent deployments will get a 400 and the job will fail.
-
-As a procedure we should update the version number when a new deployed build is needed. Or have its patch versions done automatically.
-
-Lastly the production build which pushes to Pypi only works with a tagged commit.
