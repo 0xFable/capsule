@@ -1,10 +1,12 @@
 
+import argparse
+
+import pytest
+
 from capsule.abstractions import ACmd
+from capsule.cmds import DeployCmd
 from capsule.cmds.deploy import DeployCmd
 from capsule.parser import get_main_parser, get_subcommmand_parser
-from capsule.cmds import DeployCmd
-import pytest
-import argparse
 
 
 class TestCommandAbstraction():

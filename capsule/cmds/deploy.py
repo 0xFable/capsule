@@ -1,17 +1,16 @@
-from capsule.abstractions import ACmd
-
+import asyncio
+import json
 import pathlib
 import sys
-import json
-from capsule.lib.deployer import Deployer
-from capsule.lib.config_handler import get_config
-from capsule.lib.logging_handler import LOG
+
+import requests
 from terra_sdk.client.lcd import LCDClient
 from terra_sdk.core import Coins
-import requests
-import asyncio
-from capsule.lib.config_handler import get_networks
 
+from capsule.abstractions import ACmd
+from capsule.lib.config_handler import get_config, get_networks
+from capsule.lib.deployer import Deployer
+from capsule.lib.logging_handler import LOG
 
 sys.path.append(pathlib.Path(__file__).parent.resolve())
 

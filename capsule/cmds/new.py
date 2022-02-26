@@ -1,12 +1,12 @@
 import code
+import os
+import pathlib
+import subprocess
+import sys
 from email.mime import base
 from multiprocessing.sharedctypes import Value
-from capsule.abstractions import ACmd
 
-import pathlib
-import sys
-import os
-import subprocess
+from capsule.abstractions import ACmd
 from capsule.lib.config_handler import get_config
 from capsule.lib.logging_handler import LOG
 

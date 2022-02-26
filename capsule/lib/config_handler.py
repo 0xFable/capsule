@@ -1,7 +1,9 @@
 """Load configuration from .toml file."""
-from multiprocessing.sharedctypes import Value
-import toml
 import os
+from multiprocessing.sharedctypes import Value
+
+import toml
+
 from capsule.lib.logging_handler import LOG
 
 DEFAULT_CONFIG_FILE_ENV_VAR = "CAPSULE_CONFIG_FILE"

@@ -1,8 +1,11 @@
-import os
-import pytest
-import mock
-from capsule.lib.config_handler import DEFAULT_CONFIG_FILE_ENV_VAR, get_config_file, get_config
 import asyncio
+import os
+
+import mock
+import pytest
+
+from capsule.lib.config_handler import (DEFAULT_CONFIG_FILE_ENV_VAR,
+                                        get_config, get_config_file)
 
 TEST_CONFIG_FILE_RELATIVE_PATH = "./capsule/lib/settings/config.toml"
 TEST_CONFIG_FILE_LOCATION = os.path.abspath(

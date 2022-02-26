@@ -1,20 +1,22 @@
+import asyncio
 import base64
 import json
-import requests
-
-from terra_sdk.core import Coins
-from terra_sdk.client.lcd import LCDClient, Wallet
-from terra_sdk.key.mnemonic import MnemonicKey
-from terra_sdk.util.contract import read_file_as_b64, get_code_id, get_contract_address
-from terra_sdk.core.auth import StdFee
-from terra_sdk.core.wasm import MsgStoreCode, MsgInstantiateContract, MsgExecuteContract
 import pathlib
 import sys
-import requests 
+
+import requests
+from terra_sdk.client.lcd import LCDClient, Wallet
+from terra_sdk.core import Coins
+from terra_sdk.core.auth import StdFee
+from terra_sdk.core.wasm import (MsgExecuteContract, MsgInstantiateContract,
+                                 MsgStoreCode)
+from terra_sdk.key.mnemonic import MnemonicKey
+from terra_sdk.util.contract import (get_code_id, get_contract_address,
+                                     read_file_as_b64)
+
+from capsule.abstractions.ADeployer import ADeployer
 from capsule.lib.credential_handler import get_mnemonic
 from capsule.lib.logging_handler import LOG
-import asyncio
-from capsule.abstractions.ADeployer import ADeployer
 
 sys.path.append(pathlib.Path(__file__).parent.resolve())
 

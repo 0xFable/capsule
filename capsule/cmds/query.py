@@ -1,16 +1,18 @@
 """Query command -- Used to perform queries on MultiChain contracts"""
+import asyncio
+import json
 import os
 import pathlib
 import sys
-from capsule.lib.deployer import Deployer
+
+import requests
 from terra_sdk.client.lcd import LCDClient
 from terra_sdk.core import Coins
-import requests
-import asyncio
-import json
+
 from capsule.abstractions import ACmd
-from capsule.lib.logging_handler import LOG
 from capsule.lib.config_handler import get_networks
+from capsule.lib.deployer import Deployer
+from capsule.lib.logging_handler import LOG
 
 sys.path.append(pathlib.Path(__file__).parent.resolve())
 

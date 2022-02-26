@@ -1,6 +1,8 @@
 
 import os
+
 from capsule.lib.config_handler import get_config
+
 
 async def get_mnemonic(strict=False):
     """Attempt to gather a mnemonic from one of the available sources

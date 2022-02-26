@@ -1,22 +1,24 @@
-import code
-from email.mime import base
-from capsule.abstractions import ACmd
-
-import pathlib
-import sys
-import json
-import hashlib
+import asyncio
 import base64
+import code
+import hashlib
+import json
 import os
+import pathlib
 import platform
 import subprocess
-from capsule.lib.deployer import Deployer
-from capsule.lib.config_handler import get_config
-from capsule.lib.logging_handler import LOG
+import sys
+from email.mime import base
+
+import requests
 from terra_sdk.client.lcd import LCDClient
 from terra_sdk.core import Coins
-import requests
-import asyncio
+
+from capsule.abstractions import ACmd
+from capsule.lib.config_handler import get_config
+from capsule.lib.deployer import Deployer
+from capsule.lib.logging_handler import LOG
+
 sys.path.append(pathlib.Path(__file__).parent.resolve())
 
 DEFAULT_TESTNET_CHAIN = "bombay-12"
