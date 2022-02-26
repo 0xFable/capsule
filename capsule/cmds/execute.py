@@ -10,6 +10,7 @@ import asyncio
 import json
 from capsule.abstractions import ACmd
 from capsule.lib.logging_handler import LOG
+from capsule.lib.config_handler import get_networks
 
 sys.path.append(pathlib.Path(__file__).parent.resolve())
 
@@ -55,12 +56,21 @@ class ExecuteCmd(ACmd):
             
         """
         LOG.info(f"Performing msg exectution on contract addr {args.address}")
-        chain_url="https://bombay-lcd.terra.dev"
-        chain_fcd_url="https://bombay-fcd.terra.dev"
-        
+        network_info = asyncio.run(get_networks())
+        # By default, fall back to a Terra testnet network, in this case the bombay-12 network. This could be anything in theory. But its the best option at the time
+        chain_to_use = args.chain or DEFAULT_TESTNET_CHAIN
+ 
+        # # TODO: Review setting up a list of urls in project rather than just depending on settings in config
+        chain_url = network_info.get(chain_to_use).get("chain_url")
+        chain_fcd_url = network_info.get(chain_to_use).get("chain_fcd_url")
+
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        # TODO: Validate Init_msg is wellformed json 
+
         deployer = Deployer(client=LCDClient(
             url=chain_url, 
-            chain_id=args.chain or "bombay-12",
+            chain_id=chain_to_use,
             gas_prices=Coins(requests.get(f"{chain_fcd_url}/v1/txs/gas_prices").json())))
 
         exe_result = asyncio.run(deployer.execute_contract(args.address, json.loads(args.msg)))
