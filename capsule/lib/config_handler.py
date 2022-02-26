@@ -1,6 +1,9 @@
 """Load configuration from .toml file."""
-import toml
 import os
+from multiprocessing.sharedctypes import Value
+
+import toml
+
 from capsule.lib.logging_handler import LOG
 
 DEFAULT_CONFIG_FILE_ENV_VAR = "CAPSULE_CONFIG_FILE"
@@ -48,7 +51,18 @@ async def get_config(config_path=None):
     # Read toml file
     config = toml.load(filename)
 
-    LOG.debug(f"Found these networks available: {config['networks']}")
-    LOG.debug(f"Found this deployment info: {config['deploy_info']['mnemonic']}")
-
     return config
+
+async def get_networks(config_path=None):
+    """Simple function which takes a config_file
+    and attempts to parse it as a toml config
+    returning the parsed result as a dict
+    """
+    filename = get_config_file(filename=config_path)
+    # Read toml file
+    config = toml.load(filename)
+
+
+    if not config.get('networks', False):
+        raise ValueError("Could not find any 'networks' in config. Pls ensure the toml config is well formed.")
+    return config['networks']

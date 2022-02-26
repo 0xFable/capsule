@@ -1,22 +1,24 @@
-import code
-from email.mime import base
-from capsule.abstractions import ACmd
-
-import pathlib
-import sys
-import json
-import hashlib
+import asyncio
 import base64
+import code
+import hashlib
+import json
 import os
+import pathlib
 import platform
 import subprocess
-from capsule.lib.deployer import Deployer
-from capsule.lib.config_handler import get_config
-from capsule.lib.logging_handler import LOG
+import sys
+from email.mime import base
+
+import requests
 from terra_sdk.client.lcd import LCDClient
 from terra_sdk.core import Coins
-import requests
-import asyncio
+
+from capsule.abstractions import ACmd
+from capsule.lib.config_handler import get_config
+from capsule.lib.deployer import Deployer
+from capsule.lib.logging_handler import LOG
+
 sys.path.append(pathlib.Path(__file__).parent.resolve())
 
 DEFAULT_TESTNET_CHAIN = "bombay-12"
@@ -78,21 +80,21 @@ class VerifyCmd(ACmd):
         """
         LOG.info("Starting verification")
         # Setup the Deployer with its lcd, fcd urls as well as the desired chain.
-        # config = asyncio.run(get_config())
-        chain_url="https://bombay-lcd.terra.dev"
-        chain_fcd_url="https://bombay-fcd.terra.dev"
+        
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
+        config = asyncio.run(get_config())
         # config = asyncio.run(get_config())
         # # TODO: Review setting up a list of urls in project rather than just depending on settings in config
-        # chain_url = config.get("networks", {}).get(args.chain, DEFAULT_TESTNET_CHAIN).get("chain_url")
-        # chain_fcd_url = config.get("networks", {}).get(args.chain, DEFAULT_TESTNET_CHAIN).get("chain_fcd_url")
+        chain_url = config.get("networks", {}).get(args.chain, DEFAULT_TESTNET_CHAIN).get("chain_url")
+        chain_fcd_url = config.get("networks", {}).get(args.chain, DEFAULT_TESTNET_CHAIN).get("chain_fcd_url")
 
         # TODO: Validate Init_msg is wellformed json 
+        chain_to_use = args.chain or "bombay-12"
         
         deployer = Deployer(client=LCDClient(
             url=chain_url, 
-            chain_id=args.chain or "bombay-12",
+            chain_id=chain_to_use,
             gas_prices=Coins(requests.get(f"{chain_fcd_url}/v1/txs/gas_prices").json())))
     
 

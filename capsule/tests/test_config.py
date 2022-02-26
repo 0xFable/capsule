@@ -1,8 +1,11 @@
-import os
-import pytest
-import mock
-from capsule.lib.config_handler import DEFAULT_CONFIG_FILE_ENV_VAR, get_config_file, get_config
 import asyncio
+import os
+
+import mock
+import pytest
+
+from capsule.lib.config_handler import (DEFAULT_CONFIG_FILE_ENV_VAR,
+                                        get_config, get_config_file)
 
 TEST_CONFIG_FILE_RELATIVE_PATH = "./capsule/lib/settings/config.toml"
 TEST_CONFIG_FILE_LOCATION = os.path.abspath(
@@ -17,6 +20,7 @@ class TestConfigHandler():
         """
         assert get_config_file() == "/Users/notyou"
 
+    @pytest.mark.skip("No longer is a file not found raised, a file is created instead ")
     def test_config_fails_without_a_provided_path_or_created_default_file(self):
         """test when we try to run get_config without a provided path on
         an assumed fresh system that it will fail.

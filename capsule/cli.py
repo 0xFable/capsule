@@ -1,9 +1,10 @@
 
-from capsule.parser import get_main_parser, get_subcommmand_parser
-from capsule.cmds import DeployCmd, AVAILABLE_COMMANDS
-from capsule.lib.logging_handler import LOG
+import sys
 
-import sys 
+from capsule.cmds import AVAILABLE_COMMANDS, DeployCmd
+from capsule.lib.logging_handler import LOG
+from capsule.parser import get_main_parser, get_subcommmand_parser
+
 
 def main():
     """This is the main entrypoint

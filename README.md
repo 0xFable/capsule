@@ -133,6 +133,16 @@ Capsule config  file example
 ```toml
 [deploy_info]
 mnemonic="my mem"
+
+[networks]
+
+[[bombay-12]]
+chain_url="https://bombay-lcd.terra.dev"
+chain_fcd_url="https://bombay-fcd.terra.dev"
+
+[[columbus-5]]
+chain_url="https://lcd.terra.dev"
+chain_fcd_url="https://fcd.terra.dev"
 ```
 
 - Deploy your contract

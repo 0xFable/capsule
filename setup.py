@@ -1,7 +1,8 @@
-from setuptools import setup, find_packages
-
-from os import path
 import io
+from os import path
+
+from setuptools import find_packages, setup
+
 this_directory = path.abspath(path.dirname(__file__))
 
 with io.open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
@@ -30,7 +31,7 @@ setup(
     install_requires=[
         'argparse',
         'requests',
-        'terra_sdk',
+        'terra_sdk==1.0.2',
         'toml',
         'GitPython'
     ],
