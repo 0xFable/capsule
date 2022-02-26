@@ -14,10 +14,12 @@ import requests
 from capsule.lib.credential_handler import get_mnemonic
 from capsule.lib.logging_handler import LOG
 import asyncio
+from capsule.abstractions.ADeployer import ADeployer
+
 sys.path.append(pathlib.Path(__file__).parent.resolve())
 
 
-class Deployer():
+class Deployer(ADeployer):
     """Deployer is a simple facade object
     providing an interface towards general deployment
     actions such as sending messages, getting addresses,
