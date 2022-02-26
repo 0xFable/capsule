@@ -17,6 +17,7 @@ class TestConfigHandler():
         """
         assert get_config_file() == "/Users/notyou"
 
+    @pytest.mark.skip("No longer is a file not found raised, a file is created instead ")
     def test_config_fails_without_a_provided_path_or_created_default_file(self):
         """test when we try to run get_config without a provided path on
         an assumed fresh system that it will fail.
