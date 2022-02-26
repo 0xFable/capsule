@@ -31,7 +31,7 @@ setup(
     install_requires=[
         'argparse',
         'requests',
-        'terra_sdk',
+        'terra_sdk==1.0.2',
         'toml',
         'GitPython'
     ],
