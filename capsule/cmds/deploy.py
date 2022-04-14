@@ -23,7 +23,8 @@ class DeployCmd(ACmd):
     CMD_USAGE = """
     $ capsule deploy -p ./my_contract.wasm -c columbus-5
     $ capsule deploy --path ./artifacts/my_contract.wasm --chain tequila-0004
-    $ capsule deploy -p artifacts/capsule_test.wasm -i '{"count":17}' -c bombay-12"""
+    $ capsule deploy -p artifacts/capsule_test.wasm -i '{"count":17}' -c bombay-12
+    $ capsule deploy -p artifacts/capsule_test.wasm -u "true" -c columbus-5"""
     CMD_DESCRIPTION = "Helper tool which enables you to programatically deploy a Wasm contract artifact to a chain as a code object and instantiate it"
 
     def initialise(self):
@@ -46,6 +47,12 @@ class DeployCmd(ACmd):
                                  type=str,
                                  default="",
                                  help="(Optional) A chain to deploy too. Defaults to localterra")
+
+        # TODO: Best to update this to a bool rather than a string. Currently any truthy value passed here means uploadonly
+        self.parser.add_argument("-u", "--uploadonly",
+                                 type=str,
+                                 default="",
+                                 help="(Optional) Pass this when you only want to store code IDs and not instantiate also")
 
 
         
@@ -85,10 +92,12 @@ class DeployCmd(ACmd):
             gas_prices=Coins(requests.get(f"{chain_fcd_url}/v1/txs/gas_prices").json())))
         # # Attempt to store the provided package as a code object, the response will be a code ID if successful
         stored_code_id = asyncio.run(deployer.store_contract(contract_name="test", contract_path=args.package))
+        LOG.info(f"Successfully uploaded and stored the WASM @ {args.package} to network {args.chain} with a resultant stored code ID of {stored_code_id}")
         # Instantiate a contract using the stored code ID for our contract bundle
         # and an init msg which will be different depending on the contract.
-        instantiation_result = asyncio.run(deployer.instantiate_contract(stored_code_id, init_msg=json.loads(args.initmsg)))
-        LOG.info(f"Successfully deployed contract artifact located at {args.package}. Contract address of instantiated contract is {instantiation_result}")
+        if not args.uploadonly:
+            instantiation_result = asyncio.run(deployer.instantiate_contract(stored_code_id, init_msg=json.loads(args.initmsg)))
+            LOG.info(f"Successfully deployed contract artifact located at {args.package}. Contract address of instantiated contract is {instantiation_result}")
 
 
 

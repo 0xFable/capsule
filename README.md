@@ -5,6 +5,11 @@ capsule is a small tool with a simple but noble goal; to make deployment of Cosm
 Firstly we are targeting [Terra](https://terra.money) as the Sponsor User chain as we build out the capsule tool. Eventually we aim to make capsule one of the tools of choice for deploying CosmWasm contracts on all chains!
 
 [Quick video detailing how it works](https://www.youtube.com/watch?v=swBKSpBrz2c)
+
+## Whats New 
+14.04.22:
+- Added an upload only option for wasm deploys. Also fixed up verify for both chains on terra.
+- Fixed up and confirm verify works on both x64 and aarm64
 ## Setup
 
 ### Install from pypi
@@ -102,6 +107,8 @@ usage:
     $ capsule deploy -p ./my_contract.wasm -c columbus-5
     $ capsule deploy --path ./artifacts/my_contract.wasm --chain tequila-0004
     $ capsule deploy -p artifacts/capsule_test.wasm -i '{"count":17}' -c bombay-12
+    $ capsule deploy -p artifacts/capsule_test.wasm -u "true" -c columbus-5
+
 
 Helper tool which enables you to programatically deploy a Wasm contract artifact to a chain as a code object and instantiate it
 ```
