@@ -20,6 +20,11 @@ from capsule.lib.logging_handler import LOG
 
 sys.path.append(pathlib.Path(__file__).parent.resolve())
 
+import enum
+class SupportedChains(enum.Enum):
+   TERRA = 1
+   JUNO = 2
+   OSMOSIS = 3
 
 class Deployer(ADeployer):
     """Deployer is a simple facade object
@@ -132,25 +137,30 @@ class Deployer(ADeployer):
         LOG.info(query_result)
         return query_result
     
-    async def query_code_id(self, code_id: int):
+    async def query_code_id(self, chain_url: str, code_id: int):
         """
         """
         LOG.info(f"Query to be ran {code_id}")
         # query_result = self.client.wasm.code_info(code_id)
         # query_two = self.client.wasm._c._get(f"/wasm/codes/{code_id}")
 
-        query_raw = requests.get(f"https://bombay-lcd.terra.dev/wasm/codes/{code_id}").json()
+        query_raw = requests.get(f"{chain_url}/wasm/codes/{code_id}").json()
         return query_raw
 
-    async def query_code_bytecode(self, chain_url: str, code_id: int):
+    async def query_code_bytecode(self, chain_url: str, code_id: int, target_chain=SupportedChains.TERRA):
         """
         """
         LOG.info(f"Query to be ran {code_id}")
-        # query_result = self.client.wasm.code_info(code_id)
-        # query_two = self.client.wasm._c._get(f"/wasm/codes/{code_id}")
-        # TODO: This query is not cross-chain capable 
-        query_raw = requests.get(f"{chain_url}/terra/wasm/v1beta1/codes/{code_id}/byte_code").json()
-        LOG.info(query_raw)
+
+        if target_chain == SupportedChains.TERRA:
+        
+            # TODO: This query is not cross-chain capable 
+            query_raw = requests.get(f"{chain_url}/terra/wasm/v1beta1/codes/{code_id}/byte_code").json()
+            LOG.info(query_raw)
+        elif target_chain in SupportedChains:
+            LOG.info("Chain which should be support")
+        else: 
+            LOG.info("Chain not supported")
         return query_raw
         
 
