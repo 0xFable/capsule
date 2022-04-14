@@ -35,7 +35,7 @@ class Deployer(ADeployer):
         self.mnemonic = asyncio.run(get_mnemonic())
         LOG.debug(self.mnemonic)
         self.deployer = Wallet(lcd=self.client, key=MnemonicKey(self.mnemonic))
-        self.std_fee = StdFee(4000000, "600000uluna")
+        self.std_fee = StdFee(3969390, Coins.from_str("700000uusd"))
 
     async def send_msg(self, msg):
         """send_msg attempts to create 
@@ -64,6 +64,7 @@ class Deployer(ADeployer):
             str: The contract storage result is parsed and just the code id of the stored code object is returned
         """
         # If the full path was provided, use it else assume its located in artifacts
+        LOG.info(contract_path if contract_path else f"artifacts/{contract_name}.wasm")
         bytes = read_file_as_b64(contract_path if contract_path else f"artifacts/{contract_name}.wasm")
         msg = MsgStoreCode(self.deployer.key.acc_address, bytes)
         contract_storage_result = await self.send_msg(msg)
@@ -141,14 +142,15 @@ class Deployer(ADeployer):
         query_raw = requests.get(f"https://bombay-lcd.terra.dev/wasm/codes/{code_id}").json()
         return query_raw
 
-    async def query_code_bytecode(self, code_id: int):
+    async def query_code_bytecode(self, chain_url: str, code_id: int):
         """
         """
         LOG.info(f"Query to be ran {code_id}")
         # query_result = self.client.wasm.code_info(code_id)
         # query_two = self.client.wasm._c._get(f"/wasm/codes/{code_id}")
         # TODO: This query is not cross-chain capable 
-        query_raw = requests.get(f"https://bombay-lcd.terra.dev/terra/wasm/v1beta1/codes/36374/byte_code").json()
+        query_raw = requests.get(f"{chain_url}/terra/wasm/v1beta1/codes/{code_id}/byte_code").json()
+        LOG.info(query_raw)
         return query_raw
         
 

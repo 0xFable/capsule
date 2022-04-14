@@ -92,7 +92,7 @@ class DeployCmd(ACmd):
             gas_prices=Coins(requests.get(f"{chain_fcd_url}/v1/txs/gas_prices").json())))
         # # Attempt to store the provided package as a code object, the response will be a code ID if successful
         stored_code_id = asyncio.run(deployer.store_contract(contract_name="test", contract_path=args.package))
-        LOG.info(f"Successfully uploaded and stored the WASM @ {args.path} to network {args.chain} with a resultant stored code ID of {stored_code_id}")
+        LOG.info(f"Successfully uploaded and stored the WASM @ {args.package} to network {args.chain} with a resultant stored code ID of {stored_code_id}")
         # Instantiate a contract using the stored code ID for our contract bundle
         # and an init msg which will be different depending on the contract.
         if not args.uploadonly:

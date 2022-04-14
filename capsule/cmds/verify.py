@@ -84,6 +84,8 @@ class VerifyCmd(ACmd):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         config = asyncio.run(get_config())
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
         # config = asyncio.run(get_config())
         # # TODO: Review setting up a list of urls in project rather than just depending on settings in config
         chain_url = config.get("networks", {}).get(args.chain, DEFAULT_TESTNET_CHAIN).get("chain_url")
@@ -100,6 +102,7 @@ class VerifyCmd(ACmd):
 
 
         contract_dir = os.path.abspath(args.package)
+        print(contract_dir)
         # TODO: Refactor into a neater function 
         if not args.nobuild: 
             if platform.uname()[4] == "arm64":
@@ -112,7 +115,7 @@ class VerifyCmd(ACmd):
                     process = subprocess.run('docker run --rm -v "$(pwd)":/code \
                             --mount type=volume,source="$(basename "$(pwd)")_cache",target=/code/target \
                             --mount type=volume,source=registry_cache,target=/usr/local/cargo/registry \
-                            cosmwasm/rust-optimizer-arm64:0.12.4', cwd=contract_dir, shell=True, check=True, stdout=subprocess.PIPE, universal_newlines=True)
+                            cosmwasm/workspace-optimizer-arm64:0.12.5', cwd=contract_dir, shell=True, check=True, stdout=subprocess.PIPE, universal_newlines=True)
 
                     LOG.info(process.stdout)
 
@@ -128,7 +131,7 @@ class VerifyCmd(ACmd):
         
         # code_id_info = asyncio.run(deployer.query_code_id(args.codeid))
         # LOG.info(base64.b64decode(code_id_info['result']['code_hash']))
-        code_byte_code = asyncio.run(deployer.query_code_bytecode(args.codeid))
+        code_byte_code = asyncio.run(deployer.query_code_bytecode(chain_url, args.codeid))
         on_chain = hashlib.sha256()
         on_chain.update(base64.b64decode(code_byte_code['byte_code']))
         # LOG.info(on_chain.digest())
@@ -137,15 +140,21 @@ class VerifyCmd(ACmd):
         # Get the hash from artifacts 
         # TODO: Make less POC and more MVP, what if there are multiple checksums 
         with open(contract_dir+"/artifacts/checksums.txt", "r") as file:
-            first_line = file.readline()
-            sha_to_compare = first_line.split("  ")[0].encode()
             LOG.info(f"[SHA265 of code with id {args.codeid}] {on_chain_code_sha.lower()}")
-            LOG.info(f"[SHA265 of code with path {args.package}] {sha_to_compare}")
+            # Simple flag to see if we found a match at all 
+            found = False
+            for line in file:
+                sha_to_compare = line.split("  ")[0].encode()
+                contract_name = line.split("  ")[1].encode()
+                LOG.debug(f"[SHA265 of code found in artifacts directory with name {contract_name}] {sha_to_compare}")
 
-            if sha_to_compare == on_chain_code_sha.lower():
-                LOG.info("[Verification]: Success. The provided contract wasm matches the provided code ID's byte_code hash")
-            else:
+                if sha_to_compare == on_chain_code_sha.lower():
+                    LOG.info("[Verification]: Success. The provided contract wasm matches the provided code ID's byte_code hash")
+                    found = True
+            
+            if not found:
                 LOG.info("[Verification]: Failed. The provided contract wasm does not match the provided code ID's byte_code hash")
+            LOG.info("[Verification]: Command run finished")
 
         
 
