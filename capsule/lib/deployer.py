@@ -34,14 +34,23 @@ class Deployer(ADeployer):
     uploading code objects, instantiating them into contracts
     and also executing or querying those contracts
     """
-    # TODO: Refactor such that any Cosmos-like client can be passed 
-    # Maybe some logic in the init to swtich between which client to use
-    def __init__(self, client: LCDClient) -> None:
-        
+    
+    def __init__(self, client, target_chain: enum.Enum = SupportedChains.TERRA) -> None:
+        """__init__ takes only a client which is expected to be an already instantiated LCDClient for a network of your choice.
+        By default it is expected you will provide a LCDClient configured for use with the Terra Network as this is the original target network. 
+        In the event you want to use this deployer in a multi-chain sense for any other CosmWasm enabled chain you should also provide a different value for the 
+        `target_chain` param. Provided the target_chain is a SupportedChain, a relevant chain specific implementation of each of 
+        the abstractmethods defined in ADeployer should be provided. 
+
+        Args:
+            client (oneOf terra_sdk.client.lcd.LCDClient | OtherClient): An instantiated LCDClient class for the chain you want to use.
+            target_chain (enum.Enum, optional): Optional, used only when you want to target a chain other than Terra such as Juno. Defaults to SupportedChains.TERRA.
+        """
+        self.target_chain = target_chain
         self.client = client
         self.mnemonic = asyncio.run(get_mnemonic())
-        LOG.debug(self.mnemonic)
         self.deployer = Wallet(lcd=self.client, key=MnemonicKey(self.mnemonic))
+        # TODO: Use constants here 
         self.std_fee = StdFee(3969390, Coins.from_str("700000uusd"))
 
     async def send_msg(self, msg):
@@ -53,8 +62,6 @@ class Deployer(ADeployer):
         tx = self.deployer.create_and_sign_tx(
             msgs=[msg], fee=self.std_fee
         )
-        # estimated = self.client.tx.estimate_fee(tx, fee_denoms=["uusd"], msgs=[msg])
-        # LOG.info(f'estimated fee: {estimated}')
         return self.client.tx.broadcast(tx)
 
     async def store_contract(self, contract_name:str, contract_path:str="") -> str:
@@ -140,7 +147,17 @@ class Deployer(ADeployer):
         return query_result
     
     async def query_code_id(self, chain_url: str, code_id: int, target_chain=SupportedChains.TERRA):
-        """
+        """query_code_id is used to make a REST request to the relevant chain_url 
+        to specifically query the `code_details` of a given code_id
+
+        Args:
+            chain_url (str): The Chain Host of the chain to interact with e.g 
+            code_id (int): The code_id to query 
+            target_chain (SupportedChains Enum, optional): Only used when you wish to target a chain other than Terra. 
+                Each chain can have different methods or URLs to request the same info and this option decides which way to perform queries  Defaults to SupportedChains.TERRA.
+
+        Returns:
+            Dict: `code_details` structure containing a hash with a certain encoding.
         """
         LOG.info(f"Query to be ran {code_id}")
         # query_result = self.client.wasm.code_info(code_id)
@@ -158,7 +175,17 @@ class Deployer(ADeployer):
         return query_raw
 
     async def query_code_bytecode(self, chain_url: str, code_id: int, target_chain=SupportedChains.TERRA):
-        """
+        """query_code_bytecode is used to make a REST request to the relevant chain_url 
+        to query the actualy bytecode of the stored code object for the given code_id 
+
+        Args:
+            chain_url (str): The Chain Host of the chain to interact with e.g 
+            code_id (int): The code_id to query 
+            target_chain (SupportedChains Enum, optional): Only used when you wish to target a chain other than Terra. 
+                Each chain can have different methods or URLs to request the same info and this option decides which way to perform queries  Defaults to SupportedChains.TERRA.
+
+        Returns:
+            dict: Dictionary containing the byte_code in base64
         """
         LOG.info(f"Query to be ran {code_id}")
 
