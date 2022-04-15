@@ -21,10 +21,11 @@ from capsule.lib.logging_handler import LOG
 sys.path.append(pathlib.Path(__file__).parent.resolve())
 
 import enum
+from enum import auto 
 class SupportedChains(enum.Enum):
-   TERRA = 1
-   JUNO = 2
-   OSMOSIS = 3
+   TERRA = auto()
+   JUNO = auto()
+   OSMOSIS = auto()
 
 class Deployer(ADeployer):
     """Deployer is a simple facade object
@@ -33,7 +34,8 @@ class Deployer(ADeployer):
     uploading code objects, instantiating them into contracts
     and also executing or querying those contracts
     """
-
+    # TODO: Refactor such that any Cosmos-like client can be passed 
+    # Maybe some logic in the init to swtich between which client to use
     def __init__(self, client: LCDClient) -> None:
         
         self.client = client
@@ -137,14 +139,22 @@ class Deployer(ADeployer):
         LOG.info(query_result)
         return query_result
     
-    async def query_code_id(self, chain_url: str, code_id: int):
+    async def query_code_id(self, chain_url: str, code_id: int, target_chain=SupportedChains.TERRA):
         """
         """
         LOG.info(f"Query to be ran {code_id}")
         # query_result = self.client.wasm.code_info(code_id)
         # query_two = self.client.wasm._c._get(f"/wasm/codes/{code_id}")
+        if target_chain == SupportedChains.TERRA:
+            query_raw = requests.get(f"{chain_url}/wasm/codes/{code_id}").json()
 
-        query_raw = requests.get(f"{chain_url}/wasm/codes/{code_id}").json()
+        elif target_chain in SupportedChains:
+            LOG.info("Chain which should be support")
+            if target_chain == SupportedChains.JUNO:
+                LOG.info(f"Running query against the Juno chain with Chain URL of {chain_url}")
+                query_raw = requests.get(f"{chain_url}/cosmwasm/wasm/v1/code/{code_id}").json()
+        else: 
+            LOG.info("Chain not supported")
         return query_raw
 
     async def query_code_bytecode(self, chain_url: str, code_id: int, target_chain=SupportedChains.TERRA):
@@ -159,6 +169,13 @@ class Deployer(ADeployer):
             LOG.info(query_raw)
         elif target_chain in SupportedChains:
             LOG.info("Chain which should be support")
+            if target_chain == SupportedChains.JUNO:
+                LOG.info(f"Running query against the Juno chain with Chain URL of {chain_url}")
+                query_raw = requests.get(f"{chain_url}/cosmwasm/wasm/v1/code/{code_id}").json()
+                # In order to maintain similar outputs, cut off everything but the datahere
+                query_raw = {
+                    "byte_code": query_raw["data"]
+                }
         else: 
             LOG.info("Chain not supported")
         return query_raw

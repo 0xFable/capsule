@@ -22,7 +22,17 @@ from capsule.lib.logging_handler import LOG
 sys.path.append(pathlib.Path(__file__).parent.resolve())
 
 DEFAULT_TESTNET_CHAIN = "bombay-12"
+# TODO: This enum is also in deployer, move to one place 
+import enum
+from enum import auto 
+class SupportedChains(enum.Enum):
+   TERRA = auto()
+   JUNO = auto()
+   OSMOSIS = auto()
 
+# TODO: IS there a better way to handle theres network names ? Probably
+IS_TERRA = lambda network: network in ["columbus-5", "bombay-12"]
+IS_JUNO = lambda network: network in ["juno", "uni"]
 class VerifyCmd(ACmd):
 
     CMD_NAME = "verify"
@@ -128,10 +138,15 @@ class VerifyCmd(ACmd):
                     LOG.info(process.stdout)
                 except subprocess.CalledProcessError as grepexc:                                                                                                   
                     LOG.info("error code", grepexc.returncode, grepexc.output)
-        
-        # code_id_info = asyncio.run(deployer.query_code_id(args.codeid))
-        # LOG.info(base64.b64decode(code_id_info['result']['code_hash']))
-        code_byte_code = asyncio.run(deployer.query_code_bytecode(chain_url, args.codeid))
+
+        # By Default the target chain is terra 
+        target_chain = SupportedChains.TERRA
+        if IS_JUNO(args.chain):
+            target_chain = SupportedChains.JUNO
+
+        code_byte_code = asyncio.run(deployer.query_code_bytecode(chain_url, args.codeid, target_chain=target_chain))
+
+        # Handle the code_byte_code and get a sha 
         on_chain = hashlib.sha256()
         on_chain.update(base64.b64decode(code_byte_code['byte_code']))
         # LOG.info(on_chain.digest())
