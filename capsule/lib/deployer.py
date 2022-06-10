@@ -7,9 +7,14 @@ import sys
 import requests
 from terra_sdk.client.lcd import LCDClient, Wallet
 from terra_sdk.core import Coins
-from terra_sdk.core.auth import StdFee
+from terra_sdk.core.fee import Fee as StdFee
+from terra_sdk.client.lcd.api.tx import CreateTxOptions
+
 from terra_sdk.core.wasm import (MsgExecuteContract, MsgInstantiateContract,
                                  MsgStoreCode)
+from terra_sdk.core.wasm.data import AccessConfig
+from terra_proto.cosmwasm.wasm.v1 import AccessType
+
 from terra_sdk.key.mnemonic import MnemonicKey
 from terra_sdk.util.contract import (get_code_id, get_contract_address,
                                      read_file_as_b64)
@@ -59,8 +64,8 @@ class Deployer(ADeployer):
         msg and then broadcasts the tx
 
         """
-        tx = self.deployer.create_and_sign_tx(
-            msgs=[msg], fee=self.std_fee
+        tx = self.deployer.create_and_sign_tx(CreateTxOptions(
+            msgs=[msg])
         )
         return self.client.tx.broadcast(tx)
 
@@ -80,7 +85,7 @@ class Deployer(ADeployer):
         # If the full path was provided, use it else assume its located in artifacts
         LOG.info(contract_path if contract_path else f"artifacts/{contract_name}.wasm")
         bytes = read_file_as_b64(contract_path if contract_path else f"artifacts/{contract_name}.wasm")
-        msg = MsgStoreCode(self.deployer.key.acc_address, bytes)
+        msg = MsgStoreCode(self.deployer.key.acc_address, bytes, instantiate_permission=AccessConfig(permission=AccessType.ACCESS_TYPE_ONLY_ADDRESS, address=self.deployer.key.acc_address))
         contract_storage_result = await self.send_msg(msg)
         LOG.info(contract_storage_result)
         return get_code_id(contract_storage_result)
