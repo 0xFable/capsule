@@ -7,9 +7,14 @@ import sys
 import requests
 from terra_sdk.client.lcd import LCDClient, Wallet
 from terra_sdk.core import Coins
-from terra_sdk.core.auth import StdFee
+from terra_sdk.core.fee import Fee as StdFee
+from terra_sdk.client.lcd.api.tx import CreateTxOptions
+
 from terra_sdk.core.wasm import (MsgExecuteContract, MsgInstantiateContract,
                                  MsgStoreCode)
+from terra_sdk.core.wasm.data import AccessConfig
+from terra_proto.cosmwasm.wasm.v1 import AccessType
+
 from terra_sdk.key.mnemonic import MnemonicKey
 from terra_sdk.util.contract import (get_code_id, get_contract_address,
                                      read_file_as_b64)
@@ -21,10 +26,11 @@ from capsule.lib.logging_handler import LOG
 sys.path.append(pathlib.Path(__file__).parent.resolve())
 
 import enum
+from enum import auto 
 class SupportedChains(enum.Enum):
-   TERRA = 1
-   JUNO = 2
-   OSMOSIS = 3
+   TERRA = auto()
+   JUNO = auto()
+   OSMOSIS = auto()
 
 class Deployer(ADeployer):
     """Deployer is a simple facade object
@@ -33,13 +39,23 @@ class Deployer(ADeployer):
     uploading code objects, instantiating them into contracts
     and also executing or querying those contracts
     """
+    
+    def __init__(self, client, target_chain: enum.Enum = SupportedChains.TERRA) -> None:
+        """__init__ takes only a client which is expected to be an already instantiated LCDClient for a network of your choice.
+        By default it is expected you will provide a LCDClient configured for use with the Terra Network as this is the original target network. 
+        In the event you want to use this deployer in a multi-chain sense for any other CosmWasm enabled chain you should also provide a different value for the 
+        `target_chain` param. Provided the target_chain is a SupportedChain, a relevant chain specific implementation of each of 
+        the abstractmethods defined in ADeployer should be provided. 
 
-    def __init__(self, client: LCDClient) -> None:
-        
+        Args:
+            client (oneOf terra_sdk.client.lcd.LCDClient | OtherClient): An instantiated LCDClient class for the chain you want to use.
+            target_chain (enum.Enum, optional): Optional, used only when you want to target a chain other than Terra such as Juno. Defaults to SupportedChains.TERRA.
+        """
+        self.target_chain = target_chain
         self.client = client
         self.mnemonic = asyncio.run(get_mnemonic())
-        LOG.debug(self.mnemonic)
         self.deployer = Wallet(lcd=self.client, key=MnemonicKey(self.mnemonic))
+        # TODO: Use constants here 
         self.std_fee = StdFee(3969390, Coins.from_str("700000uusd"))
 
     async def send_msg(self, msg):
@@ -48,11 +64,9 @@ class Deployer(ADeployer):
         msg and then broadcasts the tx
 
         """
-        tx = self.deployer.create_and_sign_tx(
-            msgs=[msg], fee=self.std_fee
+        tx = self.deployer.create_and_sign_tx(CreateTxOptions(
+            msgs=[msg])
         )
-        # estimated = self.client.tx.estimate_fee(tx, fee_denoms=["uusd"], msgs=[msg])
-        # LOG.info(f'estimated fee: {estimated}')
         return self.client.tx.broadcast(tx)
 
     async def store_contract(self, contract_name:str, contract_path:str="") -> str:
@@ -71,12 +85,12 @@ class Deployer(ADeployer):
         # If the full path was provided, use it else assume its located in artifacts
         LOG.info(contract_path if contract_path else f"artifacts/{contract_name}.wasm")
         bytes = read_file_as_b64(contract_path if contract_path else f"artifacts/{contract_name}.wasm")
-        msg = MsgStoreCode(self.deployer.key.acc_address, bytes)
+        msg = MsgStoreCode(self.deployer.key.acc_address, bytes, instantiate_permission=AccessConfig(permission=AccessType.ACCESS_TYPE_ONLY_ADDRESS, address=self.deployer.key.acc_address))
         contract_storage_result = await self.send_msg(msg)
         LOG.info(contract_storage_result)
         return get_code_id(contract_storage_result)
     
-    async def instantiate_contract(self, code_id: str, init_msg:dict) -> str:
+    async def instantiate_contract(self, code_id: str, init_msg:dict, label: str = "Contract deployed with Capsule") -> str:
         """instantiate_contract attempts to 
         instantiate a code object with an init msg 
         into a live contract on the network. 
@@ -92,7 +106,8 @@ class Deployer(ADeployer):
             sender=self.deployer.key.acc_address,
             admin=self.deployer.key.acc_address,
             code_id=code_id,
-            init_msg=init_msg
+            msg=init_msg,
+            label=label
         )
 
         instantiation_result = await self.send_msg(msg)
@@ -137,18 +152,46 @@ class Deployer(ADeployer):
         LOG.info(query_result)
         return query_result
     
-    async def query_code_id(self, chain_url: str, code_id: int):
-        """
+    async def query_code_id(self, chain_url: str, code_id: int, target_chain=SupportedChains.TERRA):
+        """query_code_id is used to make a REST request to the relevant chain_url 
+        to specifically query the `code_details` of a given code_id
+
+        Args:
+            chain_url (str): The Chain Host of the chain to interact with e.g 
+            code_id (int): The code_id to query 
+            target_chain (SupportedChains Enum, optional): Only used when you wish to target a chain other than Terra. 
+                Each chain can have different methods or URLs to request the same info and this option decides which way to perform queries  Defaults to SupportedChains.TERRA.
+
+        Returns:
+            Dict: `code_details` structure containing a hash with a certain encoding.
         """
         LOG.info(f"Query to be ran {code_id}")
         # query_result = self.client.wasm.code_info(code_id)
         # query_two = self.client.wasm._c._get(f"/wasm/codes/{code_id}")
+        if target_chain == SupportedChains.TERRA:
+            query_raw = requests.get(f"{chain_url}/wasm/codes/{code_id}").json()
 
-        query_raw = requests.get(f"{chain_url}/wasm/codes/{code_id}").json()
+        elif target_chain in SupportedChains:
+            LOG.info("Chain which should be support")
+            if target_chain == SupportedChains.JUNO:
+                LOG.info(f"Running query against the Juno chain with Chain URL of {chain_url}")
+                query_raw = requests.get(f"{chain_url}/cosmwasm/wasm/v1/code/{code_id}").json()
+        else: 
+            LOG.info("Chain not supported")
         return query_raw
 
     async def query_code_bytecode(self, chain_url: str, code_id: int, target_chain=SupportedChains.TERRA):
-        """
+        """query_code_bytecode is used to make a REST request to the relevant chain_url 
+        to query the actualy bytecode of the stored code object for the given code_id 
+
+        Args:
+            chain_url (str): The Chain Host of the chain to interact with e.g 
+            code_id (int): The code_id to query 
+            target_chain (SupportedChains Enum, optional): Only used when you wish to target a chain other than Terra. 
+                Each chain can have different methods or URLs to request the same info and this option decides which way to perform queries  Defaults to SupportedChains.TERRA.
+
+        Returns:
+            dict: Dictionary containing the byte_code in base64
         """
         LOG.info(f"Query to be ran {code_id}")
 
@@ -159,6 +202,13 @@ class Deployer(ADeployer):
             LOG.info(query_raw)
         elif target_chain in SupportedChains:
             LOG.info("Chain which should be support")
+            if target_chain == SupportedChains.JUNO:
+                LOG.info(f"Running query against the Juno chain with Chain URL of {chain_url}")
+                query_raw = requests.get(f"{chain_url}/cosmwasm/wasm/v1/code/{code_id}").json()
+                # In order to maintain similar outputs, cut off everything but the datahere
+                query_raw = {
+                    "byte_code": query_raw["data"]
+                }
         else: 
             LOG.info("Chain not supported")
         return query_raw
