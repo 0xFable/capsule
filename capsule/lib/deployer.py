@@ -90,7 +90,7 @@ class Deployer(ADeployer):
         LOG.info(contract_storage_result)
         return get_code_id(contract_storage_result)
     
-    async def instantiate_contract(self, code_id: str, init_msg:dict) -> str:
+    async def instantiate_contract(self, code_id: str, init_msg:dict, label: str = "Contract deployed with Capsule") -> str:
         """instantiate_contract attempts to 
         instantiate a code object with an init msg 
         into a live contract on the network. 
@@ -106,7 +106,8 @@ class Deployer(ADeployer):
             sender=self.deployer.key.acc_address,
             admin=self.deployer.key.acc_address,
             code_id=code_id,
-            init_msg=init_msg
+            msg=init_msg,
+            label=label
         )
 
         instantiation_result = await self.send_msg(msg)

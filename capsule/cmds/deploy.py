@@ -1,4 +1,5 @@
 import asyncio
+from itertools import chain
 import json
 import pathlib
 import sys
@@ -36,9 +37,14 @@ class DeployCmd(ACmd):
         self.parser.add_argument("-p", "--package",
                                  type=str,
                                  help="(required) Name of new or path to existing package")
+
+        self.parser.add_argument("-i", "--codeid",
+                                 type=str,
+                                 default="",
+                                 help="(Required) A code id to deploy with. Overrides building and uploading from package option")
         
         # Add any positional or optional arguments here
-        self.parser.add_argument("-i", "--initmsg",
+        self.parser.add_argument("-m", "--initmsg",
                                  type=str,
                                  default={},
                                  help="(Optional) The initialization message for the contract you are trying to deploy. Must be a json-like str")
@@ -47,6 +53,12 @@ class DeployCmd(ACmd):
                                  type=str,
                                  default="",
                                  help="(Optional) A chain to deploy too. Defaults to localterra")
+        
+        
+        self.parser.add_argument("-l", "--label",
+                                 type=str,
+                                 default="",
+                                 help="(Optional) A label to associate the contract with.")
 
         # TODO: Best to update this to a bool rather than a string. Currently any truthy value passed here means uploadonly
         self.parser.add_argument("-u", "--uploadonly",
@@ -73,7 +85,7 @@ class DeployCmd(ACmd):
 
             Return success. 
         """
-        LOG.info("Starting deployment")
+        LOG.info("Starting deployment from local")
         network_info = asyncio.run(get_networks())
         # By default, fall back to a Terra testnet network, in this case the bombay-12 network. This could be anything in theory. But its the best option at the time
         chain_to_use = args.chain or DEFAULT_TESTNET_CHAIN
@@ -89,14 +101,17 @@ class DeployCmd(ACmd):
         deployer = Deployer(client=LCDClient(
             url=chain_url, 
             chain_id=chain_to_use,
-            gas_prices=Coins(requests.get(f"{chain_fcd_url}/v1/txs/gas_prices").json())))
+            gas_prices=Coins(requests.get(f"{chain_fcd_url}/v1/txs/gas_prices").json()),
+            gas_adjustment=network_info.get(chain_to_use).get("gas_adjustment", 3)))
         # # Attempt to store the provided package as a code object, the response will be a code ID if successful
-        stored_code_id = asyncio.run(deployer.store_contract(contract_name="test", contract_path=args.package))
-        LOG.info(f"Successfully uploaded and stored the WASM @ {args.package} to network {args.chain} with a resultant stored code ID of {stored_code_id}")
+        if args.package and not args.codeid:
+
+            stored_code_id = asyncio.run(deployer.store_contract(contract_name="test", contract_path=args.package))
+            LOG.info(f"Successfully uploaded and stored the WASM @ {args.package} to network {args.chain} with a resultant stored code ID of {stored_code_id}")
         # Instantiate a contract using the stored code ID for our contract bundle
         # and an init msg which will be different depending on the contract.
         if not args.uploadonly:
-            instantiation_result = asyncio.run(deployer.instantiate_contract(stored_code_id, init_msg=json.loads(args.initmsg)))
+            instantiation_result = asyncio.run(deployer.instantiate_contract(args.codeid or stored_code_id, init_msg=json.loads(args.initmsg), label=args.label if args.label else None))
             LOG.info(f"Successfully deployed contract artifact located at {args.package}. Contract address of instantiated contract is {instantiation_result}")
 
 
